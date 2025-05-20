@@ -1,0 +1,10 @@
+CREATE TABLE public.users (
+	"Id" int4 NOT NULL,
+	"Login" text NOT NULL,
+	"Password" text NOT NULL,
+	"IsFirstLogin" bool NOT NULL,
+	"IsAdmin" bool NOT NULL,
+	"IsBlocked" bool NOT NULL,
+	"CounterFailed" int4 NOT NULL,
+	"LastLogin" timestamptz NULL
+);
