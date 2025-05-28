@@ -1,0 +1,7 @@
+dotnet new tool-manifest
+dotnet tool install --local dotnet-ef
+
+Заходишь в дбвиер и создаешь папку public  postgres можно развернуть и там создать схему, горячие клавиши (alt+Insert)  
+сокращенн на клаве ins может быть
+ввожу название public и нажимаю горячие клавиши сntrl+shift+a или название "Set default scheme"
+и схема должна подсветиться жирной обводкой
