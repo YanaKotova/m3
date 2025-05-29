@@ -1,0 +1,166 @@
+-- Создание таблицы категорий автомобилей
+CREATE TABLE car_categories (
+    category_id SERIAL PRIMARY KEY,
+    category_name VARCHAR(50) NOT NULL,
+    description TEXT
+);
+
+-- Создание таблицы статусов автомобилей
+CREATE TABLE car_statuses (
+    status_id SERIAL PRIMARY KEY,
+    status_name VARCHAR(50) NOT NULL,
+    description TEXT
+);
+
+-- Создание таблицы автомобилей
+CREATE TABLE cars (
+    car_id SERIAL PRIMARY KEY,
+    license_plate VARCHAR(15) NOT NULL UNIQUE,
+    brand VARCHAR(50) NOT NULL,
+    model VARCHAR(50) NOT NULL,
+    category_id INTEGER REFERENCES car_categories(category_id),
+    mileage DECIMAL(10, 2) DEFAULT 0,
+    status_id INTEGER REFERENCES car_statuses(status_id),
+    last_maintenance_date DATE,
+    next_maintenance_date DATE
+);
+
+-- Создание таблицы клиентов
+CREATE TABLE clients (
+    client_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(100),
+    passport_number VARCHAR(50) NOT NULL,
+    driver_license VARCHAR(50) NOT NULL,
+    registration_date DATE NOT NULL DEFAULT CURRENT_DATE
+);
+
+-- Создание таблицы сотрудников
+CREATE TABLE employees (
+    employee_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    position VARCHAR(50) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    hire_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- Создание таблицы типов технического обслуживания
+CREATE TABLE maintenance_types (
+    maintenance_type_id SERIAL PRIMARY KEY,
+    type_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    average_duration INTERVAL
+);
+
+-- Создание таблицы технического обслуживания
+CREATE TABLE maintenance (
+    maintenance_id SERIAL PRIMARY KEY,
+    car_id INTEGER REFERENCES cars(car_id),
+    maintenance_type_id INTEGER REFERENCES maintenance_types(maintenance_type_id),
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP,
+    employee_id INTEGER REFERENCES employees(employee_id),
+    notes TEXT,
+    status VARCHAR(50) NOT NULL DEFAULT 'Запланировано'
+);
+
+-- Создание таблицы бронирований с нормальными ключами
+CREATE TABLE bookings (
+    booking_id SERIAL PRIMARY KEY,
+    client_id INTEGER NOT NULL,
+    car_id INTEGER NOT NULL,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
+    booking_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    employee_id INTEGER NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Подтверждено',
+    notes TEXT,
+    FOREIGN KEY (client_id) REFERENCES clients(client_id),
+    FOREIGN KEY (car_id) REFERENCES cars(car_id),
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id)
+);
+
+-- Создание таблицы аренд
+CREATE TABLE rentals (
+    rental_id SERIAL PRIMARY KEY,
+    booking_id INTEGER REFERENCES bookings(booking_id),
+    actual_start_date TIMESTAMP,
+    actual_end_date TIMESTAMP,
+    initial_mileage DECIMAL(10, 2),
+    end_mileage DECIMAL(10, 2),
+    fuel_level_start INTEGER,
+    fuel_level_end INTEGER,
+    employee_start_id INTEGER REFERENCES employees(employee_id),
+    employee_end_id INTEGER REFERENCES employees(employee_id),
+    status VARCHAR(50) NOT NULL,
+    damage_description TEXT,
+    additional_charges DECIMAL(10, 2) DEFAULT 0
+);
+
+-- Создание таблицы тарифов
+CREATE TABLE tariffs (
+    tariff_id SERIAL PRIMARY KEY,
+    category_id INTEGER REFERENCES car_categories(category_id),
+    name VARCHAR(100) NOT NULL,
+    rate_per_hour DECIMAL(10, 2) NOT NULL,
+    rate_per_day DECIMAL(10, 2) NOT NULL,
+    min_rental_period INTERVAL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- Создание таблицы платежей
+CREATE TABLE payments (
+    payment_id SERIAL PRIMARY KEY,
+    rental_id INTEGER REFERENCES rentals(rental_id),
+    amount DECIMAL(10, 2) NOT NULL,
+    payment_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    payment_method VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    transaction_id VARCHAR(100)
+);
+
+-- Заполнение таблицы категорий автомобилей
+INSERT INTO car_categories (category_name) VALUES 
+('На каждый день'),
+('Праздник'),
+('Груз и шаттл'),
+('Молния'),
+('Жара');
+
+-- Заполнение таблицы статусов автомобилей
+INSERT INTO car_statuses (status_name) VALUES 
+('Свободен'),
+('Занят');
+
+-- Заполнение таблицы автомобилей
+INSERT INTO cars (license_plate, brand, model, mileage) VALUES
+('м324ст797', 'Geely', 'Coolray Flagship', 34578.0),
+('е434ка797', 'Geely', 'Coolray Flagship', 45718.0),
+('у831ое77', 'Geely', 'Coolray Flagship', 56122.0),
+('с452оо77', 'Renault', 'Duster', 178567.0),
+('м674то97', 'Renault', 'Duster', 12478.0),
+('е592оу777', 'Renault', 'Duster', 126789.0),
+('о553вс797', 'Renault', 'Duster', 45890.0),
+('о444ту197', 'Volkswagen', 'Polo 6', 78121.0),
+('с591ут97', 'Volkswagen', 'Polo 6', 56477.0),
+('в667см97', 'Volkswagen', 'Polo 6', 23045.0),
+('в569оо777', 'Volkswagen', 'Polo 6', 40784.0),
+('с231оо797', 'Volkswagen', 'Polo 6', 112089.0),
+('в583ее77', 'Volkswagen', 'Polo 6', 89014.0),
+('о454вс77', 'Mercedes', 'E200', 14875.0),
+('е982то97', 'Mercedes', 'E200', 15277.0),
+('е337ео777', 'Mercedes', 'E200', 89457.0),
+('о123оу777', 'Mercedes', 'C180', 38457.0),
+('о093оо97', 'Mercedes', 'C180', 103784.0),
+('е772ое777', 'Audi', 'A6', 124561.0),
+('о438вм97', 'Ford', 'Transit', 82467.0),
+('о127ум97', 'Ford', 'Transit', 98453.0),
+('в673со77', 'Peugeot', 'Expert', 123811.0),
+('е654аа777', 'Электрокар', 'Nissan Leaf', 68124.0),
+('а676ут797', 'Электрокар', 'Nissan Leaf', 36489.0),
+('т444от777', 'Jeep', 'Sahara', 55012.0);

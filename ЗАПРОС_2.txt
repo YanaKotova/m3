@@ -1,0 +1,35 @@
+SELECT 
+    c.car_id,
+    c.license_plate,
+    ROUND(
+        SUM(EXTRACT(EPOCH FROM (r.actual_end_date - r.actual_start_date)) / 3600) 
+        / (COUNT(DISTINCT DATE(r.actual_start_date)) * 24) 
+        * 100, 2
+    ) AS utilization_percent
+FROM cars c
+JOIN bookings b ON c.car_id = b.car_id
+JOIN rentals r ON b.booking_id = r.booking_id
+WHERE r.actual_start_date IS NOT NULL AND r.actual_end_date IS NOT NULL
+GROUP BY c.car_id, c.license_plate
+ORDER BY utilization_percent DESC;
+
+
+
+
+
+
+
+SELECT 
+    c.car_id,
+    c.license_plate,
+    ROUND(
+        SUM(EXTRACT(EPOCH FROM (r.actual_end_date - r.actual_start_date)) / 3600) 
+        / (EXTRACT(EPOCH FROM (MAX(r.actual_end_date) - MIN(r.actual_start_date)) / 3600)) 
+        * 100, 2
+    ) AS utilization_percent
+FROM cars c
+JOIN bookings b ON c.car_id = b.car_id
+JOIN rentals r ON b.booking_id = r.booking_id
+WHERE r.actual_start_date IS NOT NULL AND r.actual_end_date IS NOT NULL
+GROUP BY c.car_id, c.license_plate
+ORDER BY utilization_percent DESC;
